@@ -6,7 +6,7 @@ interface SendEmailOptions {
   html: string
   text?: string
   replyTo?: string
-  headers?: Record<string, string>
+  customArgs?: Record<string, string>
 }
 
 interface EmailResult {
@@ -30,18 +30,40 @@ export async function sendEmail(options: SendEmailOptions): Promise<EmailResult>
   const sgMail = (await import('@sendgrid/mail')).default
   sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
-  const [response] = await sgMail.send({
+  const unsubUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/unsubscribe`
+
+  const msg: Record<string, unknown> = {
     to: options.to,
     from: { email: options.from, name: options.fromName || undefined },
     subject: options.subject,
     html: options.html,
     text: options.text || undefined,
     replyTo: options.replyTo || undefined,
-    headers: options.headers || undefined,
-  })
+    headers: {
+      'List-Unsubscribe': `<${unsubUrl}>`,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    },
+    customArgs: options.customArgs || undefined,
+  }
 
-  const messageId = response.headers?.['x-message-id'] || `sg_${Date.now()}`
-  return { messageId, status: response.statusCode === 202 ? 'accepted' : 'sent' }
+  // Attempt with retry for rate limiting
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const [response] = await sgMail.send(msg as unknown as Parameters<typeof sgMail.send>[0])
+      const messageId = response.headers?.['x-message-id'] || `sg_${Date.now()}`
+      return { messageId, status: response.statusCode === 202 ? 'accepted' : 'sent' }
+    } catch (err: unknown) {
+      const statusCode = (err as { code?: number })?.code
+      if (statusCode === 429 && attempt < 2) {
+        // Rate limited - wait and retry
+        await new Promise(resolve => setTimeout(resolve, (attempt + 1) * 2000))
+        continue
+      }
+      throw err
+    }
+  }
+
+  throw new Error('SendGrid send failed after retries')
 }
 
 export async function sendBatchEmails(emails: SendEmailOptions[]): Promise<BatchEmailResult> {

@@ -198,6 +198,16 @@ export async function POST(request: NextRequest) {
             metadata: { source: 'import' },
           }))
           await supabase.from('contact_activities').insert(activityRows)
+
+          // Emit contact_created events for automation engine
+          const eventRows = insertedContacts.map((contact) => ({
+            workspace_id: workspaceId,
+            event_type: 'contact_created',
+            contact_id: contact.id,
+            payload: { contact_id: contact.id, source: 'import' },
+            processed: false,
+          }))
+          await supabase.from('event_log').insert(eventRows)
         }
       }
 

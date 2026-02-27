@@ -161,6 +161,11 @@ export default function ContactDetailPage({
   const [newFieldKey, setNewFieldKey] = useState('')
   const [newFieldValue, setNewFieldValue] = useState('')
 
+  // Automation enrollment
+  const [availableAutomations, setAvailableAutomations] = useState<{ id: string; name: string }[]>([])
+  const [automationPopoverOpen, setAutomationPopoverOpen] = useState(false)
+  const [enrolling, setEnrolling] = useState(false)
+
   // -------------------------------------------------------------------
   // Fetch contact
   // -------------------------------------------------------------------
@@ -298,6 +303,45 @@ export default function ContactDetailPage({
     })
     await fetchContact()
     await fetchActivities(1)
+  }
+
+  // -------------------------------------------------------------------
+  // Automation enrollment
+  // -------------------------------------------------------------------
+  async function fetchAutomations() {
+    try {
+      const res = await fetch('/api/automations?status=active&limit=50')
+      if (res.ok) {
+        const data = await res.json()
+        setAvailableAutomations(
+          (data.automations || []).map((a: { id: string; name: string }) => ({
+            id: a.id,
+            name: a.name,
+          }))
+        )
+      }
+    } catch (err) {
+      console.error('Failed to fetch automations:', err)
+    }
+  }
+
+  async function handleEnrollAutomation(automationId: string) {
+    setEnrolling(true)
+    try {
+      const res = await fetch(`/api/automations/${automationId}/runs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact_id: contactId }),
+      })
+      if (res.ok) {
+        setAutomationPopoverOpen(false)
+        await fetchActivities(1)
+      }
+    } catch (err) {
+      console.error('Failed to enroll in automation:', err)
+    } finally {
+      setEnrolling(false)
+    }
   }
 
   // -------------------------------------------------------------------
@@ -837,10 +881,36 @@ export default function ContactDetailPage({
                 <MessageSquare className="mr-2 h-4 w-4" />
                 Send SMS
               </Button>
-              <Button variant="outline" className="w-full justify-start" disabled>
-                <Bot className="mr-2 h-4 w-4" />
-                Add to Automation
-              </Button>
+              <Popover
+                open={automationPopoverOpen}
+                onOpenChange={(open) => {
+                  setAutomationPopoverOpen(open)
+                  if (open) fetchAutomations()
+                }}
+              >
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start" disabled={enrolling}>
+                    <Bot className="mr-2 h-4 w-4" />
+                    {enrolling ? 'Enrolling...' : 'Add to Automation'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search automations..." />
+                    <CommandList>
+                      <CommandEmpty>No active automations found.</CommandEmpty>
+                      <CommandGroup>
+                        {availableAutomations.map((a) => (
+                          <CommandItem key={a.id} onSelect={() => handleEnrollAutomation(a.id)}>
+                            <Zap className="mr-2 h-4 w-4" />
+                            {a.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </CardContent>
           </Card>
 

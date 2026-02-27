@@ -10,16 +10,34 @@ function isGSM7(text: string): boolean {
   return true
 }
 
-export function countSmsSegments(text: string): {
-  segments: number
+export const COST_PER_SEGMENT = 0.0079
+
+export interface SMSSegmentInfo {
   charCount: number
-  isUnicode: boolean
-  charsPerSegment: number
-} {
-  const isUnicode = !isGSM7(text)
+  segmentCount: number
+  encoding: 'GSM-7' | 'UCS-2'
+  maxChars: number
+  charsRemaining: number
+  costEstimate: number
+}
+
+export function calculateSMSSegments(text: string): SMSSegmentInfo {
+  if (!text || text.length === 0) {
+    return {
+      charCount: 0,
+      segmentCount: 0,
+      encoding: 'GSM-7',
+      maxChars: 160,
+      charsRemaining: 160,
+      costEstimate: 0,
+    }
+  }
+
+  const unicode = !isGSM7(text)
+  const encoding: 'GSM-7' | 'UCS-2' = unicode ? 'UCS-2' : 'GSM-7'
 
   let charCount = 0
-  if (isUnicode) {
+  if (unicode) {
     charCount = text.length
   } else {
     for (const char of text) {
@@ -27,20 +45,39 @@ export function countSmsSegments(text: string): {
     }
   }
 
-  const singleLimit = isUnicode ? 70 : 160
-  const multiLimit = isUnicode ? 67 : 153
+  const singleLimit = unicode ? 70 : 160
+  const multiLimit = unicode ? 67 : 153
 
-  let segments: number
+  let segmentCount: number
+  let maxChars: number
+
   if (charCount <= singleLimit) {
-    segments = 1
+    segmentCount = charCount === 0 ? 0 : 1
+    maxChars = singleLimit
   } else {
-    segments = Math.ceil(charCount / multiLimit)
+    segmentCount = Math.ceil(charCount / multiLimit)
+    maxChars = segmentCount * multiLimit
   }
 
   return {
-    segments,
     charCount,
-    isUnicode,
-    charsPerSegment: charCount <= singleLimit ? singleLimit : multiLimit,
+    segmentCount,
+    encoding,
+    maxChars,
+    charsRemaining: maxChars - charCount,
+    costEstimate: segmentCount * COST_PER_SEGMENT,
+  }
+}
+
+// Legacy export for backward compat
+export function countSmsSegments(text: string) {
+  const info = calculateSMSSegments(text)
+  return {
+    segments: info.segmentCount,
+    charCount: info.charCount,
+    isUnicode: info.encoding === 'UCS-2',
+    charsPerSegment: info.charCount <= (info.encoding === 'UCS-2' ? 70 : 160)
+      ? (info.encoding === 'UCS-2' ? 70 : 160)
+      : (info.encoding === 'UCS-2' ? 67 : 153),
   }
 }
