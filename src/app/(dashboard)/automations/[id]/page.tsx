@@ -6,8 +6,6 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -28,14 +26,6 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import {
   ArrowLeft,
   Plus,
   Trash2,
@@ -47,13 +37,17 @@ import {
   Globe,
   Bell,
   Pencil,
-  GripVertical,
   Save,
   Users,
   Settings,
   Play,
+  Pause,
   ChevronDown,
   ChevronUp,
+  Zap,
+  CheckCircle2,
+  XCircle,
+  Loader2,
 } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 
@@ -90,15 +84,15 @@ interface AutomationRun {
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const STEP_TYPES = [
-  { type: 'send_email', label: 'Send Email', icon: Mail, group: 'Actions' },
-  { type: 'send_sms', label: 'Send SMS', icon: MessageSquare, group: 'Actions' },
-  { type: 'webhook', label: 'Webhook', icon: Globe, group: 'Actions' },
-  { type: 'wait', label: 'Wait / Delay', icon: Clock, group: 'Flow' },
-  { type: 'condition', label: 'Condition', icon: GitBranch, group: 'Flow' },
-  { type: 'add_tag', label: 'Add Tag', icon: Tag, group: 'Data' },
-  { type: 'remove_tag', label: 'Remove Tag', icon: Tag, group: 'Data' },
-  { type: 'update_field', label: 'Update Field', icon: Pencil, group: 'Data' },
-  { type: 'notify', label: 'Notify Team', icon: Bell, group: 'Actions' },
+  { type: 'send_email', label: 'Send Email', icon: Mail, group: 'Actions', color: 'text-blue-400', bg: 'bg-blue-500/10' },
+  { type: 'send_sms', label: 'Send SMS', icon: MessageSquare, group: 'Actions', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+  { type: 'webhook', label: 'Webhook', icon: Globe, group: 'Actions', color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+  { type: 'wait', label: 'Wait / Delay', icon: Clock, group: 'Flow', color: 'text-amber-400', bg: 'bg-amber-500/10' },
+  { type: 'condition', label: 'Condition', icon: GitBranch, group: 'Flow', color: 'text-purple-400', bg: 'bg-purple-500/10' },
+  { type: 'add_tag', label: 'Add Tag', icon: Tag, group: 'Data', color: 'text-pink-400', bg: 'bg-pink-500/10' },
+  { type: 'remove_tag', label: 'Remove Tag', icon: Tag, group: 'Data', color: 'text-orange-400', bg: 'bg-orange-500/10' },
+  { type: 'update_field', label: 'Update Field', icon: Pencil, group: 'Data', color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+  { type: 'notify', label: 'Notify Team', icon: Bell, group: 'Actions', color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
 ]
 
 const TRIGGER_LABELS: Record<string, string> = {
@@ -156,20 +150,22 @@ function StepEditor({
       return (
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label>Subject</Label>
+            <Label className="text-slate-400">Subject</Label>
             <Input
               value={(c.subject as string) || ''}
               onChange={(e) => onChange({ ...c, subject: e.target.value })}
               placeholder="Email subject..."
+              className="border-slate-700 bg-slate-800/50"
             />
           </div>
           <div className="space-y-1">
-            <Label>Body (HTML)</Label>
+            <Label className="text-slate-400">Body (HTML)</Label>
             <Textarea
               rows={4}
               value={(c.html_body as string) || ''}
               onChange={(e) => onChange({ ...c, html_body: e.target.value })}
               placeholder="<p>Hello {{first_name}},</p>..."
+              className="border-slate-700 bg-slate-800/50"
             />
           </div>
         </div>
@@ -178,12 +174,13 @@ function StepEditor({
     case 'send_sms':
       return (
         <div className="space-y-1">
-          <Label>Message</Label>
+          <Label className="text-slate-400">Message</Label>
           <Textarea
             rows={3}
             value={(c.message as string) || ''}
             onChange={(e) => onChange({ ...c, message: e.target.value })}
             placeholder="Hi {{first_name}}..."
+            className="border-slate-700 bg-slate-800/50"
           />
         </div>
       )
@@ -191,12 +188,12 @@ function StepEditor({
     case 'wait':
       return (
         <div className="space-y-1">
-          <Label>Duration</Label>
+          <Label className="text-slate-400">Duration</Label>
           <Select
             value={(c.duration as string) || '1h'}
             onValueChange={(v) => onChange({ ...c, duration: v })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="border-slate-700 bg-slate-800/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -217,20 +214,21 @@ function StepEditor({
       return (
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label>Field</Label>
+            <Label className="text-slate-400">Field</Label>
             <Input
               value={(c.field as string) || ''}
               onChange={(e) => onChange({ ...c, field: e.target.value })}
               placeholder="e.g. custom_fields.plan"
+              className="border-slate-700 bg-slate-800/50"
             />
           </div>
           <div className="space-y-1">
-            <Label>Operator</Label>
+            <Label className="text-slate-400">Operator</Label>
             <Select
               value={(c.operator as string) || 'equals'}
               onValueChange={(v) => onChange({ ...c, operator: v })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="border-slate-700 bg-slate-800/50">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -245,17 +243,14 @@ function StepEditor({
             </Select>
           </div>
           <div className="space-y-1">
-            <Label>Value</Label>
+            <Label className="text-slate-400">Value</Label>
             <Input
               value={String(c.value ?? '')}
               onChange={(e) => onChange({ ...c, value: e.target.value })}
               placeholder="Value to compare..."
+              className="border-slate-700 bg-slate-800/50"
             />
           </div>
-          <p className="text-xs text-muted-foreground">
-            YES branch steps and NO branch steps can be configured as sub-steps
-            within the condition config (yes_steps / no_steps arrays).
-          </p>
         </div>
       )
 
@@ -263,11 +258,12 @@ function StepEditor({
     case 'remove_tag':
       return (
         <div className="space-y-1">
-          <Label>Tag Name</Label>
+          <Label className="text-slate-400">Tag Name</Label>
           <Input
             value={(c.tag_name as string) || ''}
             onChange={(e) => onChange({ ...c, tag_name: e.target.value })}
             placeholder="Tag name..."
+            className="border-slate-700 bg-slate-800/50"
           />
         </div>
       )
@@ -276,19 +272,21 @@ function StepEditor({
       return (
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label>Field</Label>
+            <Label className="text-slate-400">Field</Label>
             <Input
               value={(c.field as string) || ''}
               onChange={(e) => onChange({ ...c, field: e.target.value })}
               placeholder="e.g. custom_fields.score"
+              className="border-slate-700 bg-slate-800/50"
             />
           </div>
           <div className="space-y-1">
-            <Label>Value</Label>
+            <Label className="text-slate-400">Value</Label>
             <Input
               value={String(c.value ?? '')}
               onChange={(e) => onChange({ ...c, value: e.target.value })}
               placeholder="New value..."
+              className="border-slate-700 bg-slate-800/50"
             />
           </div>
         </div>
@@ -298,12 +296,12 @@ function StepEditor({
       return (
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label>Method</Label>
+            <Label className="text-slate-400">Method</Label>
             <Select
               value={(c.method as string) || 'POST'}
               onValueChange={(v) => onChange({ ...c, method: v })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="border-slate-700 bg-slate-800/50">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -314,11 +312,12 @@ function StepEditor({
             </Select>
           </div>
           <div className="space-y-1">
-            <Label>URL</Label>
+            <Label className="text-slate-400">URL</Label>
             <Input
               value={(c.url as string) || ''}
               onChange={(e) => onChange({ ...c, url: e.target.value })}
               placeholder="https://..."
+              className="border-slate-700 bg-slate-800/50"
             />
           </div>
         </div>
@@ -327,27 +326,27 @@ function StepEditor({
     case 'notify':
       return (
         <div className="space-y-1">
-          <Label>Message</Label>
+          <Label className="text-slate-400">Message</Label>
           <Input
             value={(c.message as string) || ''}
             onChange={(e) => onChange({ ...c, message: e.target.value })}
             placeholder="Notification message..."
+            className="border-slate-700 bg-slate-800/50"
           />
         </div>
       )
 
     default:
-      return <p className="text-sm text-muted-foreground">Unknown step type: {step.type}</p>
+      return <p className="text-sm text-slate-500">Unknown step type: {step.type}</p>
   }
 }
 
-// ─── Step icon helper ──────────────────────────────────────────────────────
+// ─── Step icon/meta helper ──────────────────────────────────────────────────
 
-function StepIcon({ type }: { type: string }) {
-  const found = STEP_TYPES.find((s) => s.type === type)
-  if (!found) return <Pencil className="h-4 w-4" />
-  const Icon = found.icon
-  return <Icon className="h-4 w-4" />
+function getStepMeta(type: string) {
+  return STEP_TYPES.find((s) => s.type === type) || {
+    type, label: type, icon: Pencil, group: 'Other', color: 'text-slate-400', bg: 'bg-slate-500/10'
+  }
 }
 
 // ─── Run status badge ──────────────────────────────────────────────────────
@@ -355,17 +354,17 @@ function StepIcon({ type }: { type: string }) {
 function RunStatusBadge({ status }: { status: string }) {
   switch (status) {
     case 'running':
-      return <Badge className="bg-blue-100 text-blue-800 border-transparent">Running</Badge>
+      return <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 text-[11px] font-medium text-blue-400"><Loader2 className="h-3 w-3 animate-spin" />Running</span>
     case 'completed':
-      return <Badge className="bg-green-100 text-green-800 border-transparent">Completed</Badge>
+      return <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-[11px] font-medium text-emerald-400"><CheckCircle2 className="h-3 w-3" />Completed</span>
     case 'failed':
-      return <Badge className="bg-red-100 text-red-800 border-transparent">Failed</Badge>
+      return <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 border border-red-500/20 px-2.5 py-0.5 text-[11px] font-medium text-red-400"><XCircle className="h-3 w-3" />Failed</span>
     case 'waiting':
-      return <Badge className="bg-yellow-100 text-yellow-800 border-transparent">Waiting</Badge>
+      return <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[11px] font-medium text-amber-400"><Clock className="h-3 w-3" />Waiting</span>
     case 'cancelled':
-      return <Badge variant="secondary">Cancelled</Badge>
+      return <span className="inline-flex items-center rounded-full bg-slate-500/10 border border-slate-500/20 px-2.5 py-0.5 text-[11px] font-medium text-slate-400">Cancelled</span>
     default:
-      return <Badge variant="outline">{status}</Badge>
+      return <span className="inline-flex items-center rounded-full bg-slate-500/10 border border-slate-500/20 px-2.5 py-0.5 text-[11px] font-medium text-slate-400">{status}</span>
   }
 }
 
@@ -549,65 +548,87 @@ export default function AutomationDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-9 w-64" />
-        <Skeleton className="h-[400px] w-full" />
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-9 w-64 bg-slate-800" />
+        <Skeleton className="h-[400px] w-full bg-slate-800" />
       </div>
     )
   }
 
   if (!automation) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold">Automation not found</h1>
+      <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
+        <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center">
+          <Zap className="h-8 w-8 text-slate-600" />
+        </div>
+        <h1 className="text-xl font-bold">Automation not found</h1>
         <Link href="/automations">
-          <Button variant="outline">Back to Automations</Button>
+          <Button variant="outline" className="border-slate-700 text-slate-300">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Automations
+          </Button>
         </Link>
       </div>
     )
   }
 
+  const statusConfig = {
+    active: { color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', label: 'Active' },
+    paused: { color: 'bg-amber-500/10 text-amber-400 border-amber-500/20', label: 'Paused' },
+    draft: { color: 'bg-slate-500/10 text-slate-400 border-slate-500/20', label: 'Draft' },
+  }
+  const currentStatus = statusConfig[automation.status as keyof typeof statusConfig] || statusConfig.draft
+
   // ─── Render ───────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/automations">
-            <Button variant="ghost" size="icon">
+            <button className="w-10 h-10 rounded-lg border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
               <ArrowLeft className="h-4 w-4" />
-            </Button>
+            </button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold">{automation.name}</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold">{automation.name}</h1>
+              <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${currentStatus.color}`}>
+                {currentStatus.label}
+              </span>
+            </div>
             <div className="flex items-center gap-2 mt-1">
-              <Badge variant="outline">
-                {TRIGGER_LABELS[automation.trigger_type] || automation.trigger_type}
-              </Badge>
-              <Badge
-                className={
-                  automation.status === 'active'
-                    ? 'bg-green-100 text-green-800 border-transparent'
-                    : automation.status === 'paused'
-                      ? 'bg-orange-100 text-orange-800 border-transparent'
-                      : ''
-                }
-                variant={automation.status === 'draft' ? 'secondary' : 'default'}
-              >
-                {automation.status.charAt(0).toUpperCase() + automation.status.slice(1)}
-              </Badge>
+              <span className="inline-flex items-center gap-1.5 text-sm text-slate-400">
+                <Zap className="h-3.5 w-3.5 text-primary" />
+                Trigger: {TRIGGER_LABELS[automation.trigger_type] || automation.trigger_type}
+              </span>
+              <span className="text-slate-600">·</span>
+              <span className="text-sm text-slate-500">
+                {automation.steps.length} step{automation.steps.length !== 1 ? 's' : ''}
+              </span>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {automation.status !== 'draft' && (
-            <Button variant="outline" onClick={toggleStatus}>
-              {automation.status === 'active' ? 'Pause' : 'Activate'}
+            <Button
+              variant="outline"
+              onClick={toggleStatus}
+              className="border-slate-700 text-slate-300 hover:bg-slate-800"
+            >
+              {automation.status === 'active' ? (
+                <><Pause className="mr-2 h-4 w-4" /> Pause</>
+              ) : (
+                <><Play className="mr-2 h-4 w-4" /> Activate</>
+              )}
             </Button>
           )}
           {automation.status === 'draft' && automation.steps.length > 0 && (
-            <Button onClick={toggleStatus}>
+            <Button
+              onClick={toggleStatus}
+              className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
+            >
               <Play className="mr-2 h-4 w-4" />
               Activate
             </Button>
@@ -617,206 +638,280 @@ export default function AutomationDetailPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="builder" onValueChange={(v) => { if (v === 'runs') fetchRuns() }}>
-        <TabsList>
-          <TabsTrigger value="builder">Builder</TabsTrigger>
-          <TabsTrigger value="runs">
-            <Users className="mr-1 h-3.5 w-3.5" />
+        <TabsList className="bg-slate-800/60 border border-slate-700 p-1">
+          <TabsTrigger value="builder" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+            Builder
+          </TabsTrigger>
+          <TabsTrigger value="runs" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+            <Users className="mr-1.5 h-3.5 w-3.5" />
             Runs
           </TabsTrigger>
-          <TabsTrigger value="settings">
-            <Settings className="mr-1 h-3.5 w-3.5" />
+          <TabsTrigger value="settings" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+            <Settings className="mr-1.5 h-3.5 w-3.5" />
             Settings
           </TabsTrigger>
         </TabsList>
 
         {/* ── Builder Tab ────────────────────────────────────────────── */}
-        <TabsContent value="builder" className="space-y-4 mt-4">
-          {automation.steps.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground mb-4">No steps yet. Add your first step to build the automation.</p>
+        <TabsContent value="builder" className="mt-6">
+          <div className="max-w-2xl mx-auto">
+            {/* Trigger Card */}
+            <div className="relative">
+              <div className="bg-card rounded-xl border border-slate-800 p-5 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Zap className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Trigger</p>
+                    <p className="text-sm font-semibold text-white">
+                      {TRIGGER_LABELS[automation.trigger_type] || automation.trigger_type}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {/* Connector line */}
+              {automation.steps.length > 0 && (
+                <div className="flex justify-center py-1">
+                  <div className="w-px h-8 bg-slate-700" />
+                </div>
+              )}
+            </div>
+
+            {/* Steps */}
+            {automation.steps.length === 0 ? (
+              <div className="mt-4 flex justify-center">
                 <Dialog open={showAddStep} onOpenChange={setShowAddStep}>
                   <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="mr-2 h-4 w-4" />
+                    <button className="flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-dashed border-slate-700 text-slate-400 hover:border-primary hover:text-primary transition-colors">
+                      <Plus className="h-4 w-4" />
                       Add First Step
-                    </Button>
+                    </button>
                   </DialogTrigger>
                   <AddStepDialogContent onSelect={addStep} />
                 </Dialog>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              {automation.steps.map((step, index) => (
-                <Card
-                  key={index}
-                  className={editingStep === index ? 'ring-2 ring-primary' : ''}
-                >
-                  <CardContent className="py-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex flex-col items-center gap-1 pt-1">
-                        <button
-                          onClick={() => moveStep(index, 'up')}
-                          disabled={index === 0}
-                          className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-                        >
-                          <ChevronUp className="h-3.5 w-3.5" />
-                        </button>
-                        <GripVertical className="h-4 w-4 text-muted-foreground" />
-                        <button
-                          onClick={() => moveStep(index, 'down')}
-                          disabled={index === automation.steps.length - 1}
-                          className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-                        >
-                          <ChevronDown className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
+              </div>
+            ) : (
+              <>
+                {automation.steps.map((step, index) => {
+                  const meta = getStepMeta(step.type)
+                  const Icon = meta.icon
+                  const isEditing = editingStep === index
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <div className="flex items-center gap-2 text-sm font-medium">
-                            <StepIcon type={step.type} />
-                            <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">
-                              {index + 1}
-                            </span>
-                            {STEP_TYPES.find((s) => s.type === step.type)?.label || step.type}
+                  return (
+                    <div key={index} className="relative">
+                      {/* Step Card */}
+                      <div
+                        className={`bg-card rounded-xl border shadow-sm transition-all ${
+                          isEditing
+                            ? 'border-primary ring-1 ring-primary/30'
+                            : 'border-slate-800 hover:border-slate-700'
+                        }`}
+                      >
+                        <div className="p-5">
+                          <div className="flex items-start gap-4">
+                            {/* Step icon */}
+                            <div className={`w-10 h-10 rounded-lg ${meta.bg} flex items-center justify-center shrink-0`}>
+                              <Icon className={`h-5 w-5 ${meta.color}`} />
+                            </div>
+
+                            {/* Step content */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-[10px] font-bold text-slate-500 bg-slate-800 px-1.5 py-0.5 rounded">
+                                  {index + 1}
+                                </span>
+                                <span className="text-sm font-semibold text-white">{meta.label}</span>
+                              </div>
+
+                              {isEditing ? (
+                                <div className="mt-3 space-y-4">
+                                  <StepEditor
+                                    step={step}
+                                    onChange={(config) => updateStepConfig(index, config)}
+                                  />
+                                  <div className="flex gap-2 pt-1">
+                                    <Button
+                                      size="sm"
+                                      onClick={saveCurrentStep}
+                                      disabled={isSaving}
+                                      className="bg-primary hover:bg-primary/90"
+                                    >
+                                      <Save className="mr-1.5 h-3.5 w-3.5" />
+                                      {isSaving ? 'Saving...' : 'Save'}
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => setEditingStep(null)}
+                                      className="text-slate-400"
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-slate-400">
+                                  <StepSummary step={step} />
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Actions */}
+                            {!isEditing && (
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => moveStep(index, 'up')}
+                                  disabled={index === 0}
+                                  className="p-1.5 rounded-md text-slate-500 hover:text-white hover:bg-slate-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                                >
+                                  <ChevronUp className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => moveStep(index, 'down')}
+                                  disabled={index === automation.steps.length - 1}
+                                  className="p-1.5 rounded-md text-slate-500 hover:text-white hover:bg-slate-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                                >
+                                  <ChevronDown className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => setEditingStep(index)}
+                                  className="p-1.5 rounded-md text-slate-500 hover:text-white hover:bg-slate-800 transition-colors"
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => removeStep(index)}
+                                  className="p-1.5 rounded-md text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
 
-                        {editingStep === index ? (
-                          <div className="mt-3 space-y-3">
-                            <StepEditor
-                              step={step}
-                              onChange={(config) => updateStepConfig(index, config)}
-                            />
-                            <div className="flex gap-2">
-                              <Button size="sm" onClick={saveCurrentStep} disabled={isSaving}>
-                                <Save className="mr-1 h-3.5 w-3.5" />
-                                {isSaving ? 'Saving...' : 'Save'}
-                              </Button>
-                              <Button size="sm" variant="ghost" onClick={() => setEditingStep(null)}>
-                                Cancel
-                              </Button>
+                        {/* Condition branching indicator */}
+                        {step.type === 'condition' && !isEditing && (
+                          <div className="px-5 pb-4 pt-0 flex gap-3">
+                            <div className="flex-1 flex items-center gap-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10 px-3 py-2">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                              <span className="text-xs text-emerald-400 font-medium">YES branch</span>
+                            </div>
+                            <div className="flex-1 flex items-center gap-2 rounded-lg bg-red-500/5 border border-red-500/10 px-3 py-2">
+                              <XCircle className="h-3.5 w-3.5 text-red-400" />
+                              <span className="text-xs text-red-400 font-medium">NO branch</span>
                             </div>
                           </div>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">
-                            <StepSummary step={step} />
-                          </p>
                         )}
                       </div>
 
-                      <div className="flex items-center gap-1">
-                        {editingStep !== index && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => setEditingStep(index)}
-                          >
-                            <Pencil className="h-3.5 w-3.5" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive"
-                          onClick={() => removeStep(index)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+                      {/* Connector line */}
+                      {index < automation.steps.length - 1 && (
+                        <div className="flex justify-center py-1">
+                          <div className="w-px h-8 bg-slate-700" />
+                        </div>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  )
+                })}
 
-              <Dialog open={showAddStep} onOpenChange={setShowAddStep}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full border-dashed">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Step
-                  </Button>
-                </DialogTrigger>
-                <AddStepDialogContent onSelect={addStep} />
-              </Dialog>
-            </>
-          )}
+                {/* Add step button */}
+                <div className="flex justify-center py-1">
+                  <div className="w-px h-6 bg-slate-700" />
+                </div>
+                <div className="flex justify-center">
+                  <Dialog open={showAddStep} onOpenChange={setShowAddStep}>
+                    <DialogTrigger asChild>
+                      <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-dashed border-slate-700 text-slate-400 hover:border-primary hover:text-primary transition-colors text-sm font-medium">
+                        <Plus className="h-4 w-4" />
+                        Add Step
+                      </button>
+                    </DialogTrigger>
+                    <AddStepDialogContent onSelect={addStep} />
+                  </Dialog>
+                </div>
+              </>
+            )}
+          </div>
         </TabsContent>
 
         {/* ── Runs Tab ───────────────────────────────────────────────── */}
-        <TabsContent value="runs" className="mt-4">
-          {runsLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          ) : runs.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <Users className="mx-auto h-10 w-10 text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">No runs yet. Activate the automation to start enrolling contacts.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Current Step</TableHead>
-                  <TableHead>Started</TableHead>
-                  <TableHead>Completed</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {runs.map((run) => (
-                  <TableRow key={run.id}>
-                    <TableCell>
-                      {run.contacts ? (
-                        <Link href={`/contacts/${run.contact_id}`} className="hover:underline">
-                          {[run.contacts.first_name, run.contacts.last_name].filter(Boolean).join(' ') || run.contacts.email}
-                        </Link>
-                      ) : (
-                        <span className="text-muted-foreground">{run.contact_id.slice(0, 8)}...</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <RunStatusBadge status={run.status} />
-                    </TableCell>
-                    <TableCell>{run.current_step + 1}</TableCell>
-                    <TableCell>{new Date(run.started_at).toLocaleString()}</TableCell>
-                    <TableCell>
-                      {run.completed_at ? new Date(run.completed_at).toLocaleString() : '—'}
-                    </TableCell>
-                  </TableRow>
+        <TabsContent value="runs" className="mt-6">
+          <div className="bg-card rounded-xl border border-slate-800 shadow-sm overflow-hidden">
+            {runsLoading ? (
+              <div className="p-6 space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full bg-slate-800" />
                 ))}
-              </TableBody>
-            </Table>
-          )}
+              </div>
+            ) : runs.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4">
+                  <Users className="h-8 w-8 text-slate-600" />
+                </div>
+                <p className="text-slate-400">No runs yet</p>
+                <p className="text-sm text-slate-500 mt-1">Activate the automation to start enrolling contacts.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-800">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Contact</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Step</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Started</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Completed</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/50">
+                    {runs.map((run) => (
+                      <tr key={run.id} className="hover:bg-slate-800/30 transition-colors">
+                        <td className="px-6 py-3">
+                          {run.contacts ? (
+                            <Link href={`/contacts/${run.contact_id}`} className="text-sm font-medium text-white hover:text-primary transition-colors">
+                              {[run.contacts.first_name, run.contacts.last_name].filter(Boolean).join(' ') || run.contacts.email}
+                            </Link>
+                          ) : (
+                            <span className="text-sm text-slate-500">{run.contact_id.slice(0, 8)}...</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-3">
+                          <RunStatusBadge status={run.status} />
+                        </td>
+                        <td className="px-6 py-3 text-sm text-slate-400">{run.current_step + 1}</td>
+                        <td className="px-6 py-3 text-sm text-slate-500">{new Date(run.started_at).toLocaleString()}</td>
+                        <td className="px-6 py-3 text-sm text-slate-500">
+                          {run.completed_at ? new Date(run.completed_at).toLocaleString() : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </TabsContent>
 
         {/* ── Settings Tab ───────────────────────────────────────────── */}
-        <TabsContent value="settings" className="mt-4 space-y-6 max-w-2xl">
-          <Card>
-            <CardHeader>
-              <CardTitle>General</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <TabsContent value="settings" className="mt-6 space-y-6 max-w-2xl">
+          <div className="bg-card rounded-xl border border-slate-800 shadow-sm p-6">
+            <h3 className="text-base font-bold mb-4">General</h3>
+            <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="settings-name">Name</Label>
+                <Label htmlFor="settings-name" className="text-slate-400">Name</Label>
                 <Input
                   id="settings-name"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
+                  className="border-slate-700 bg-slate-800/50"
                 />
               </div>
-              <div className="flex items-center justify-between rounded-lg border p-4">
+              <div className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-800/30 p-4">
                 <div>
-                  <Label>Allow Re-entry</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <Label className="text-white">Allow Re-entry</Label>
+                  <p className="text-sm text-slate-500 mt-0.5">
                     Allow contacts to go through this automation more than once.
                   </p>
                 </div>
@@ -824,9 +919,9 @@ export default function AutomationDetailPage() {
               </div>
               {editReEntry && (
                 <div className="space-y-2">
-                  <Label>Re-entry Delay</Label>
+                  <Label className="text-slate-400">Re-entry Delay</Label>
                   <Select value={editReEntryDelay} onValueChange={setEditReEntryDelay}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-slate-700 bg-slate-800/50">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -840,49 +935,49 @@ export default function AutomationDetailPage() {
                   </Select>
                 </div>
               )}
-              <Button onClick={saveSettings} disabled={isSaving}>
+              <Button
+                onClick={saveSettings}
+                disabled={isSaving}
+                className="bg-primary hover:bg-primary/90"
+              >
                 <Save className="mr-2 h-4 w-4" />
                 {isSaving ? 'Saving...' : 'Save Settings'}
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Danger Zone */}
-          <Card className="border-destructive/50">
-            <CardHeader>
-              <CardTitle className="text-destructive">Danger Zone</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Deleting this automation will cancel all running instances and cannot be undone.
-              </p>
-              <Dialog open={showDelete} onOpenChange={setShowDelete}>
-                <DialogTrigger asChild>
-                  <Button variant="destructive">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Automation
+          <div className="bg-card rounded-xl border border-red-500/20 shadow-sm p-6">
+            <h3 className="text-base font-bold text-red-400 mb-2">Danger Zone</h3>
+            <p className="text-sm text-slate-500 mb-4">
+              Deleting this automation will cancel all running instances and cannot be undone.
+            </p>
+            <Dialog open={showDelete} onOpenChange={setShowDelete}>
+              <DialogTrigger asChild>
+                <Button variant="destructive" className="bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Automation
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete Automation</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete &quot;{automation.name}&quot;? This will cancel
+                    all running instances and cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowDelete(false)} className="border-slate-700">
+                    Cancel
                   </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Delete Automation</DialogTitle>
-                    <DialogDescription>
-                      Are you sure you want to delete &quot;{automation.name}&quot;? This will cancel
-                      all running instances and cannot be undone.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setShowDelete(false)}>
-                      Cancel
-                    </Button>
-                    <Button variant="destructive" onClick={deleteAutomation}>
-                      Delete
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </CardContent>
-          </Card>
+                  <Button variant="destructive" onClick={deleteAutomation}>
+                    Delete
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
@@ -899,12 +994,12 @@ function AddStepDialogContent({ onSelect }: { onSelect: (type: string) => void }
         <DialogTitle>Add Step</DialogTitle>
         <DialogDescription>Choose the type of step to add to your automation.</DialogDescription>
       </DialogHeader>
-      <div className="space-y-4 py-2">
+      <div className="space-y-5 py-2">
         {groups.map((group) => {
           const items = STEP_TYPES.filter((s) => s.group === group)
           return (
             <div key={group}>
-              <p className="text-xs font-medium text-muted-foreground mb-2">{group}</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">{group}</p>
               <div className="grid grid-cols-3 gap-2">
                 {items.map((item) => {
                   const Icon = item.icon
@@ -912,10 +1007,12 @@ function AddStepDialogContent({ onSelect }: { onSelect: (type: string) => void }
                     <button
                       key={item.type}
                       onClick={() => onSelect(item.type)}
-                      className="flex flex-col items-center gap-1.5 rounded-lg border p-3 text-sm hover:bg-accent transition-colors"
+                      className="flex flex-col items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/30 p-4 text-sm hover:border-primary hover:bg-primary/5 transition-all group"
                     >
-                      <Icon className="h-5 w-5" />
-                      <span className="text-xs text-center">{item.label}</span>
+                      <div className={`w-9 h-9 rounded-lg ${item.bg} flex items-center justify-center`}>
+                        <Icon className={`h-4 w-4 ${item.color}`} />
+                      </div>
+                      <span className="text-xs text-slate-400 group-hover:text-white font-medium text-center">{item.label}</span>
                     </button>
                   )
                 })}
