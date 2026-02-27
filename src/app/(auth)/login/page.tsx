@@ -50,7 +50,7 @@ export default function LoginPage() {
       // Create default workspace
       const { data: ws } = await supabase
         .from('workspaces')
-        .insert({ name: 'My Workspace', owner_id: data.user.id })
+        .insert({ name: 'My Workspace', slug: 'my-workspace-' + data.user.id.slice(0, 8), owner_id: data.user.id })
         .select()
         .single()
 
