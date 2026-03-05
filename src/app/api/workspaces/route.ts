@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, createServiceClient } from '@/lib/supabase/server'
 
 export async function GET() {
   try {
@@ -72,8 +72,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Use service client to bypass RLS for workspace + member creation
+    const admin = createServiceClient()
+
     // Create the workspace
-    const { data: workspace, error: wsError } = await supabase
+    const { data: workspace, error: wsError } = await admin
       .from('workspaces')
       .insert({
         name,
@@ -94,7 +97,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Add the creator as an owner member
-    const { error: memberError } = await supabase
+    const { error: memberError } = await admin
       .from('workspace_members')
       .insert({
         workspace_id: workspace.id,
@@ -104,7 +107,7 @@ export async function POST(request: NextRequest) {
 
     if (memberError) {
       // Roll back workspace creation if member insert fails
-      await supabase.from('workspaces').delete().eq('id', workspace.id)
+      await admin.from('workspaces').delete().eq('id', workspace.id)
       return NextResponse.json({ error: memberError.message }, { status: 500 })
     }
 

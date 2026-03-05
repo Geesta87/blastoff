@@ -1,4 +1,5 @@
 import { createServerClient as createSSRClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 export async function createServerClient() {
@@ -23,5 +24,19 @@ export async function createServerClient() {
         },
       },
     }
+  )
+}
+
+/**
+ * Service-role client that bypasses RLS.
+ * Use only in API routes where the caller has already been authenticated
+ * and you need to perform operations that RLS policies would block
+ * (e.g. creating a workspace + its first member in one transaction).
+ */
+export function createServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+    { auth: { autoRefreshToken: false, persistSession: false } }
   )
 }
