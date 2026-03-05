@@ -77,7 +77,7 @@ export function WorkspaceSwitcher() {
                 </span>
               )}
               <span className="truncate text-sm font-medium">
-                {workspace?.name ?? 'Select workspace'}
+                {workspace?.name ?? 'Select sub-account'}
               </span>
             </div>
             <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
@@ -85,10 +85,10 @@ export function WorkspaceSwitcher() {
         </PopoverTrigger>
         <PopoverContent className="w-[240px] p-0" align="start">
           <Command>
-            <CommandInput placeholder="Search workspaces..." />
+            <CommandInput placeholder="Search sub-accounts..." />
             <CommandList>
-              <CommandEmpty>No workspace found.</CommandEmpty>
-              <CommandGroup heading="Workspaces">
+              <CommandEmpty>No sub-account found.</CommandEmpty>
+              <CommandGroup heading="Sub-Accounts">
                 {workspaces.map((ws) => (
                   <CommandItem
                     key={ws.id}
@@ -129,7 +129,7 @@ export function WorkspaceSwitcher() {
                   className="cursor-pointer"
                 >
                   <Plus className="h-4 w-4" />
-                  <span>Create Workspace</span>
+                  <span>Create Sub-Account</span>
                 </CommandItem>
               </CommandGroup>
             </CommandList>

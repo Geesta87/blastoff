@@ -91,16 +91,19 @@ export async function PATCH(
     const allowedFields = [
       'name',
       'settings',
+      'logo_url',
+      'website',
+      'business_phone',
+      'industry',
+      'description',
+      'timezone',
       'company_name',
       'company_address',
-      'company_phone',
-      'company_website',
       'sendgrid_from_email',
       'sendgrid_from_name',
       'twilio_phone_number',
       'monthly_email_limit',
       'monthly_sms_limit',
-      'timezone',
     ]
 
     const updates: Record<string, unknown> = {}

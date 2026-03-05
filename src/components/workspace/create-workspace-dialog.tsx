@@ -81,7 +81,7 @@ export function CreateWorkspaceDialog({
 
       if (!response.ok) {
         if (response.status === 409) {
-          setError('A workspace with this slug already exists. Please choose a different slug.')
+          setError('A sub-account with this slug already exists. Please choose a different slug.')
         } else {
           setError(data.error || 'Failed to create workspace')
         }
@@ -102,9 +102,9 @@ export function CreateWorkspaceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create Workspace</DialogTitle>
+          <DialogTitle>Create Sub-Account</DialogTitle>
           <DialogDescription>
-            Create a new workspace to organize your campaigns and contacts.
+            Create a new sub-account with its own identity, campaigns, and integrations.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -113,7 +113,7 @@ export function CreateWorkspaceDialog({
               <Label htmlFor="workspace-name">Name</Label>
               <Input
                 id="workspace-name"
-                placeholder="My Workspace"
+                placeholder="My Client Business"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isSubmitting}

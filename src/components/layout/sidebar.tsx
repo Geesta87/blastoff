@@ -24,6 +24,7 @@ const navigation = [
   { name: 'Automations', href: '/automations', icon: Zap },
   { name: 'Templates', href: '/templates/email', icon: Share2 },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Social Channels', href: '/social', icon: Share2 },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 

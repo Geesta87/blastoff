@@ -61,6 +61,14 @@ export interface Workspace {
   slug: string
   owner_id: string
   settings: Record<string, unknown>
+  logo_url: string | null
+  website: string | null
+  business_phone: string | null
+  industry: string | null
+  description: string | null
+  timezone: string | null
+  company_name: string | null
+  company_address: string | null
   twilio_phone_number: string | null
   sendgrid_from_email: string | null
   sendgrid_from_name: string | null
